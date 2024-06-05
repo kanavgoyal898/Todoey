@@ -31,7 +31,16 @@
                             <outlet property="delegate" destination="kfJ-jC-V2J" id="61D-2r-fG8"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="ToDoey" id="rY2-2H-JVY"/>
+                    <toolbarItems/>
+                    <navigationItem key="navigationItem" title="ToDoey" id="rY2-2H-JVY">
+                        <barButtonItem key="rightBarButtonItem" systemItem="add" id="OwW-GU-hCE">
+                            <color key="tintColor" systemColor="labelColor"/>
+                            <connections>
+                                <action selector="addButtonPressed:" destination="kfJ-jC-V2J" id="aK6-40-7ES"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
+                    <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="1OP-lI-puP" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
@@ -53,10 +62,13 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Fy8-QE-ujX" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2116.7938931297708" y="-385.21126760563385"/>
+            <point key="canvasLocation" x="2309" y="-385"/>
         </scene>
     </scenes>
     <resources>
+        <systemColor name="labelColor">
+            <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
