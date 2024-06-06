@@ -1,4 +1,5 @@
 import UIKit
+import CoreData
 
 class ToDoListViewController: UITableViewController {
     
@@ -6,6 +7,8 @@ class ToDoListViewController: UITableViewController {
     var dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
     
     var itemArray = [Item]()
+    
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -36,7 +39,10 @@ class ToDoListViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         itemArray[indexPath.row].done = !itemArray[indexPath.row].done
         
-        self.saveItems()
+        context.delete(itemArray[indexPath.row])
+        itemArray.remove(at: indexPath.row)
+        
+        saveItems()
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
@@ -48,9 +54,10 @@ class ToDoListViewController: UITableViewController {
         let alert = UIAlertController(title: "Add New ToDoey Item", message: "", preferredStyle: .alert)
         let action = UIAlertAction(title: "Add Item", style: .default) { action in
             if let item = textField.text {
-                let newItem = Item(title: item, done: false)
-                self.itemArray.append(newItem)
                 
+                let newItem = Item(context: self.context)
+                newItem.title = item
+                self.itemArray.append(newItem)
                 
                 self.saveItems()
             }
@@ -68,34 +75,20 @@ class ToDoListViewController: UITableViewController {
     func saveItems() {
         self.tableView.reloadData()
         
-        let encoder = PropertyListEncoder()
         do {
-            let data = try encoder.encode(self.itemArray)
-            do {
-                if let safeDataFilePath = self.dataFilePath {
-                    try data.write(to: safeDataFilePath)
-                }
-            } catch {
-                print(error.localizedDescription)
-            }
+            try context.save()
         } catch {
             print(error.localizedDescription)
         }
     }
     
     func loadItems() {
-        if let safeDataFilePath = dataFilePath {
-            do {
-                let data = try Data(contentsOf: safeDataFilePath)
-                let decoder = PropertyListDecoder()
-                do {
-                    itemArray = try decoder.decode([Item].self, from: data)
-                } catch {
-                    print(error.localizedDescription)
-                }
-            } catch {
-                print(error.localizedDescription)
-            }
+        let request : NSFetchRequest<Item> = Item.fetchRequest()
+        
+        do {
+            itemArray = try context.fetch(request)
+        } catch {
+            print(error.localizedDescription)
         }
     }
 }
