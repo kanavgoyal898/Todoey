@@ -54,6 +54,12 @@ class CategoryViewController: UITableViewController {
                 destinationVC.selectedCategory = category
             }
         }
+        
+        if segue.identifier == "goToItemsAll" {
+            let destinationVC = segue.destination as! ToDoListViewController
+            
+            destinationVC.selectedCategory = nil
+        }
 
     }
     
@@ -101,14 +107,21 @@ class CategoryViewController: UITableViewController {
             }
         }
         
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
+        
         alert.addTextField { alertTextField in
             alertTextField.placeholder = "New Category"
             textField = alertTextField
         }
         
         alert.addAction(action)
+        alert.addAction(cancelAction)
         
         present(alert, animated: true)
+    }
+    
+    @IBAction func viewAllPressed(_ sender: UIBarButtonItem) {
+        performSegue(withIdentifier: "goToItemsAll", sender: self)
     }
     
     func saveCategories() {

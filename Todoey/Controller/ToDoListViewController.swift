@@ -80,12 +80,15 @@ class ToDoListViewController: UITableViewController {
             }
         }
         
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
+        
         alert.addTextField { alterTextField in
             alterTextField.placeholder = "ToDoey Item"
             textField = alterTextField
         }
         
         alert.addAction(action)
+        alert.addAction(cancelAction)
         
         present(alert, animated: true)
     }
@@ -102,21 +105,33 @@ class ToDoListViewController: UITableViewController {
     
     func loadItems(with request : NSFetchRequest<Item> = Item.fetchRequest(), predicate : NSPredicate? = nil) {
                 
-        let categoryPredicate = NSPredicate(format: "parentCategory.name MATCHES %@", selectedCategory?.name ?? "")
-        
-        if let safePredicate = predicate {
-            request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [safePredicate, categoryPredicate])
+        if let safeCategoryPredicate = selectedCategory {
+            let categoryPredicate = NSPredicate(format: "parentCategory.name MATCHES %@", safeCategoryPredicate.name ?? "")
+            
+            if let safePredicate = predicate {
+                request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [safePredicate, categoryPredicate])
+            } else {
+                request.predicate = categoryPredicate
+            }
+            
+            do {
+                itemArray = try context.fetch(request)
+            } catch {
+                print(error.localizedDescription)
+            }
+            
         } else {
-            request.predicate = categoryPredicate
-        }
-        
-        do {
-            itemArray = try context.fetch(request)
-        } catch {
-            print(error.localizedDescription)
+            request.predicate = predicate
+            
+            do {
+                itemArray = try context.fetch(request)
+            } catch {
+                print(error.localizedDescription)
+            }
         }
         
         tableView.reloadData()
+        
     }
 }
 
