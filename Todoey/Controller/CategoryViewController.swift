@@ -3,7 +3,7 @@ import CoreData
 
 class CategoryViewController: UITableViewController {
     
-    let defaults = UserDefaults()
+    let defaults = UserDefaults.standard
     
     var categories = [Category]()
     
@@ -50,10 +50,38 @@ class CategoryViewController: UITableViewController {
             let destinationVC = segue.destination as! ToDoListViewController
             
             if let indexPath = tableView.indexPathForSelectedRow {
-                destinationVC.selectedCategory = categories[indexPath.row]
+                let category = categories[indexPath.row]
+                destinationVC.selectedCategory = category
             }
         }
 
+    }
+    
+    override func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { action, sourceView, completionHandler in
+            let category = self.categories[indexPath.row]
+            self.categories.remove(at: indexPath.row)
+            
+            let request : NSFetchRequest<Item> = Item.fetchRequest()
+            request.predicate = NSPredicate(format: "parentCategory.name MATCHES %@", category.name ?? "")
+            
+            do {
+                let toDeleteItems = try self.context.fetch(request)
+                for toDeleteItem in toDeleteItems {
+                    self.context.delete(toDeleteItem)
+                }
+            } catch {
+                print(error.localizedDescription)
+            }
+            
+            self.context.delete(category)
+            self.saveCategories()
+            
+            completionHandler(true)
+        }
+        
+        deleteAction.image = UIImage(systemName: "trash")
+        return UISwipeActionsConfiguration(actions: [deleteAction])
     }
  
     //MARK: - Add New Category

@@ -4,7 +4,6 @@ import CoreData
 class ToDoListViewController: UITableViewController {
     
     var defaults = UserDefaults.standard
-    var dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
     
     var itemArray = [Item]()
     
@@ -44,11 +43,23 @@ class ToDoListViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         itemArray[indexPath.row].done = !itemArray[indexPath.row].done
         
-        context.delete(itemArray[indexPath.row])
-        itemArray.remove(at: indexPath.row)
-        
         saveItems()
         tableView.deselectRow(at: indexPath, animated: true)
+    }
+    
+    override func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { action, sourceView, completionHandler in
+            let item = self.itemArray[indexPath.row]
+            self.itemArray.remove(at: indexPath.row)
+            
+            self.context.delete(item)
+            self.saveItems()
+            
+            completionHandler(true)
+        }
+        
+        deleteAction.image = UIImage(systemName: "trash")
+        return UISwipeActionsConfiguration(actions: [deleteAction])
     }
     
     //MARK: - Add New Items
@@ -90,7 +101,7 @@ class ToDoListViewController: UITableViewController {
     }
     
     func loadItems(with request : NSFetchRequest<Item> = Item.fetchRequest(), predicate : NSPredicate? = nil) {
-        
+                
         let categoryPredicate = NSPredicate(format: "parentCategory.name MATCHES %@", selectedCategory?.name ?? "")
         
         if let safePredicate = predicate {
